@@ -20,7 +20,11 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 airports = pd.read_csv('us_airports.csv', index_col=0)
 
+origin = 'LAX'
+destination = 'JFK'
+
 route = airports[(airports['IATA'] == origin) | (airports['IATA'] == destination)]
+
 
 
 def route_fig(origin, destination):
@@ -86,7 +90,7 @@ app.layout = html.Div(children=[
     '''),
     
     # add route plot
-    route_fig('LAX', 'JFK')])
+    route_fig(origin, destination)])
 
 if __name__ == '__main__':
     app.run_server(debug=True)
