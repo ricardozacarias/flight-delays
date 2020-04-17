@@ -27,7 +27,7 @@ route = airports[(airports['IATA'] == origin) | (airports['IATA'] == destination
 
 
 # testing
-def route_fig(origin, destination):
+def update_route(origin):
     
     # customize hover text
     text = ['<b>{x}'.format(x=x) for x in route['NAME'].values]
@@ -78,8 +78,17 @@ def route_fig(origin, destination):
                       margin=margin)
 
     return dcc.Graph(figure=fig, 
+                     id='route-map',
                      config={'displayModeBar': False})
 
+
+def select_airport_dd():
+    return dcc.Dropdown(id='demo-dropdown',
+                        options=[
+                            {'label': 'New York City', 'value': 'NYC'},
+                            {'label': 'Montreal', 'value': 'MTL'},
+                            {'label': 'San Francisco', 'value': 'SF'}],
+                        value='NYC')
 
 app.layout = html.Div(children=[
     
@@ -88,9 +97,20 @@ app.layout = html.Div(children=[
     html.Div(children='''
         A dashboard for travellers.
     '''),
+    select_airport_dd(), 
+    html.Div(id='dd-output-container'),
     
     # add route plot
-    route_fig(origin, destination)])
+    update_route(origin)
+    ])
+             
+@app.callback(
+    dash.dependencies.Output('route-map', 'figure'),
+    [dash.dependencies.Input('demo-dropdown', 'value')])
+
+def update_output(value):
+    return 'You have selected "{}"'.format(value)
+    
 
 if __name__ == '__main__':
     app.run_server(debug=True)
