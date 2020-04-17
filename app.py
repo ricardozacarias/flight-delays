@@ -23,11 +23,11 @@ airports = pd.read_csv('us_airports.csv', index_col=0)
 origin = 'LAX'
 destination = 'JFK'
 
-route = airports[(airports['IATA'] == origin) | (airports['IATA'] == destination)]
 
 
-# testing
-def update_route(origin):
+def route(origin):
+    
+    route = airports[(airports['IATA'] == origin) | (airports['IATA'] == destination)]
     
     # customize hover text
     text = ['<b>{x}'.format(x=x) for x in route['NAME'].values]
@@ -77,9 +77,9 @@ def update_route(origin):
                       height=300,
                       margin=margin)
 
-    return dcc.Graph(figure=fig, 
-                     id='route-map',
-                     config={'displayModeBar': False})
+    return fig
+
+# testing
 
 
 def select_airport_dd():
@@ -101,15 +101,19 @@ app.layout = html.Div(children=[
     html.Div(id='dd-output-container'),
     
     # add route plot
-    update_route(origin)
+    dcc.Graph(figure=route(origin), 
+                     id='route-map',
+                     config={'displayModeBar': False})
+    
+    
     ])
              
 @app.callback(
-    dash.dependencies.Output('route-map', 'figure'),
+    dash.dependencies.Output('route-map', 'value'),
     [dash.dependencies.Input('demo-dropdown', 'value')])
 
 def update_output(value):
-    return 'You have selected "{}"'.format(value)
+    return value
     
 
 if __name__ == '__main__':
