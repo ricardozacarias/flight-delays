@@ -19,102 +19,98 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 airports = pd.read_csv('us_airports.csv', index_col=0)
+airport_options = []
 
-origin = 'LAX'
-destination = 'JFK'
+map_layout = dict(
+        title = 'Your Route',
+        colorbar = True,
+        geo = dict(
+            scope='north america',
+            projection=dict(type='albers usa'),
+            showland = True,
+            landcolor = "rgb(250, 250, 250)",
+            subunitcolor = "rgb(217, 217, 217)",
+            countrycolor = "rgb(217, 217, 217)",
+            countrywidth = 0.5,
+            subunitwidth = 0.5))
 
-
-
-def route(origin):
-    
-    route = airports[(airports['IATA'] == origin) | (airports['IATA'] == destination)]
-    
-    # customize hover text
-    text = ['<b>{x}'.format(x=x) for x in route['NAME'].values]
-
-    # define hover label properties
-    hoverlabel = dict(bgcolor="white", 
-                      font_size=12, 
-                      font_family="Helvetica")
-
-    # customize markers
-    marker = dict(size=5,
+map_marker = dict(size=8,
                   color='rgb(255, 0, 0)',
                   line=dict(width=3,
                   color='rgba(68, 68, 68, 0)'))
 
-    # customiz geo properties
-    geo = dict(showland=True,
-               landcolor='rgb(243, 243, 243)',
-               countrycolor='rgb(204, 204, 204)',
-               scope='north america',
-               projection_type='azimuthal equal area')
+# define dropdown options
+for airport in airports['NAME'].unique():
+    airport_options.append({'label': airport, 'value': airports[airports['NAME'] == airport]['IATA'].values[0]})
 
-    margin = {"r":0,"t":0,"l":0,"b":0}
-
-    # create figure object
-    fig = go.Figure()
-
-    # add airport markers
-    fig.add_trace(go.Scattergeo(lon=route['LONGITUDE'],
-                                lat=route['LATITUDE'],
-                                mode='markers',
-                                marker=marker))
-
-    # add route line between airports
-    fig.add_trace(go.Scattergeo(lon=[route[route['IATA'] == origin]['LONGITUDE'].values[0], route[route['IATA'] == destination]['LONGITUDE'].values[0]],
-                                lat=[route[route['IATA'] == origin]['LATITUDE'].values[0], route[route['IATA'] == destination]['LATITUDE'].values[0]],
-                                mode='lines',
-                                hoverinfo='text',
-                                text=text,
-                                line=dict(width=1,
-                                          color='red')))
-    # add layout configurations
-    fig.update_layout(showlegend=False,
-                      geo=geo,
-                      hoverlabel=hoverlabel,
-                      width=500,
-                      height=300,
-                      margin=margin)
-
-    return fig
-
-# testing
-
-
-def select_airport_dd():
-    return dcc.Dropdown(id='demo-dropdown',
-                        options=[
-                            {'label': 'New York City', 'value': 'NYC'},
-                            {'label': 'Montreal', 'value': 'MTL'},
-                            {'label': 'San Francisco', 'value': 'SF'}],
-                        value='NYC')
-
-app.layout = html.Div(children=[
+app.layout = html.Div([
     
-    html.H1(children='A dashboard for travellers.'),
-
-    html.Div(children='''
-        A dashboard for travellers.
-    '''),
-    select_airport_dd(), 
-    html.Div(id='dd-output-container'),
+    dcc.Dropdown(
+        id='origin-dropdown',
+        options=airport_options,
+        placeholder='Select origin airport'),
     
-    # add route plot
-    dcc.Graph(figure=route(origin), 
-                     id='route-map',
-                     config={'displayModeBar': False})
+    html.Div(id='origin-text-output'),
     
+    dcc.Dropdown(
+        id='destination-dropdown',
+        options=airport_options,
+        placeholder='Select destination airport'),
+    
+    html.Div(id='destination-text-output'),
+    
+    dcc.Graph(
+        id='map',
+        
+        figure={
+            'data': [{
+                'lat': None,
+                'lon': None,
+                'type': 'scattergeo'
+            }],
+            'layout': map_layout
+        })
     
     ])
-             
-@app.callback(
-    dash.dependencies.Output('route-map', 'value'),
-    [dash.dependencies.Input('demo-dropdown', 'value')])
 
-def update_output(value):
-    return value
+@app.callback(
+    dash.dependencies.Output('origin-text-output', 'children'),
+    [dash.dependencies.Input('origin-dropdown', 'value')])
+
+def update_origin(value):
+    if value:
+        return 'Departing from {} ({})'.format(airports[airports['IATA'] == value]['NAME'].values[0], value)
+
+@app.callback(
+    dash.dependencies.Output('destination-text-output', 'children'),
+    [dash.dependencies.Input('destination-dropdown', 'value')])
+
+def update_destination(value):
+    if value:
+        return 'Arriving at {} ({})'.format(airports[airports['IATA'] == value]['NAME'].values[0], value)
+
+@app.callback(
+    dash.dependencies.Output('map', 'figure'),
+    [dash.dependencies.Input('origin-dropdown', 'value'),
+     dash.dependencies.Input('destination-dropdown', 'value')]
+)
+
+def update_map(origin, destination):
     
+    # Airport filter
+    origin_airport = airports[(airports['IATA'] == origin)]
+    destination_airport = airports[(airports['IATA'] == destination)]
+    
+    return {
+        'data': [{
+            'lat': [origin_airport['LATITUDE'].values[0], destination_airport['LATITUDE'].values[0]],
+            'lon': [destination_airport['LONGITUDE'].values[0], destination_airport['LONGITUDE'].values[0]],
+            'marker': map_marker,
+            'type': 'scattergeo'
+        }],
+        'layout': map_layout
+    }
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
