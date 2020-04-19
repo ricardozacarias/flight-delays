@@ -22,12 +22,12 @@ airports = pd.read_csv('us_airports.csv', index_col=0)
 airport_options = []
 
 map_layout = dict(showlegend = False, 
-                  geo = dict(scope='north america',
-                             projection=dict(type='azimuthal equal area'),
+                  geo = dict(scope = 'north america',
+                             projection = dict(type = 'azimuthal equal area'),
                              showland = True,
                              showcountries = True,
-                             landcolor='rgb(60, 60, 60)',
-                             countrycolor='rgb(204, 204, 204)'),
+                             landcolor ='rgb(60, 60, 60)',
+                             countrycolor ='rgb(204, 204, 204)'),
                   margin=dict(l=0,
                               r=0,
                               b=0,
@@ -45,43 +45,75 @@ for airport in airports['NAME'].unique():
 
 
 # define layout
-app.layout = html.Div([
+app.layout = html.Div(
+    className="container scalable",
+    children=[
     
-    dcc.Dropdown(
-        id='origin-dropdown',
-        options=airport_options,
-        placeholder='Select origin airport'),
-    
-    html.Div(id='origin-text-output'),
-    
-    dcc.Dropdown(
-        id='destination-dropdown',
-        options=airport_options,
-        placeholder='Select destination airport'),
-    
-    html.Div(id='destination-text-output'),
-    
-    dcc.Graph(
-        id='map',
+    html.Div([
         
-        figure={
-            'data': [{
-                'lat': [None, None],
-                'lon': [None, None],
-                'type': 'scattergeo'
-            }, 
-                {
-                'lat': [None, None],
-                'lon': [None, None],
-                'type': 'scattergeo'
-            }],
-            'layout': map_layout,
-            },
+        html.Div(
+            id="banner",
+            className="banner",
+            children=[
+                html.H3("US Flights"),
+                html.Img(
+                    src="https://fanart.tv/fanart/movies/813/hdmovieclearart/airplane-5124096339ae1.png",
+                    id="airplane-image",
+                    style={
+                        "height": "120px",
+                        "width": "auto",
+                        "margin-bottom": "25px",
+                            },
+                        )
+            ],
+        ),
         
-        config={
-        'displayModeBar': False,
-        'scrollZoom': False})
-    ])
+        html.Div(
+            id="dropdown-titles",
+            children=[
+                html.H6(html.Strong("Select origin")),
+            ],
+            style={
+                'textAlign': 'left',
+                'color': 'rgb(60, 60, 60)',
+        }),
+    
+        dcc.Dropdown(
+            id='origin-dropdown',
+            options=airport_options,
+            placeholder='Select origin airport'),
+        
+        html.Div(id='origin-text-output'),
+        
+        dcc.Dropdown(
+            id='destination-dropdown',
+            options=airport_options,
+            placeholder='Select destination airport'),
+        
+        html.Div(id='destination-text-output'),
+        
+        dcc.Graph(
+            id='map',
+            
+            figure={
+                'data': [{
+                    'lat': [None, None],
+                    'lon': [None, None],
+                    'type': 'scattergeo'
+                }, 
+                    {
+                    'lat': [None, None],
+                    'lon': [None, None],
+                    'type': 'scattergeo'
+                }],
+                'layout': map_layout,
+                },
+            
+            config={
+            'displayModeBar': False,
+            'scrollZoom': False})
+        ])
+            ])
 
 # text display origin airport
 @app.callback(
