@@ -43,6 +43,8 @@ map_marker = dict(size=8,
 for airport in airports['NAME'].unique():
     airport_options.append({'label': airport, 'value': airports[airports['NAME'] == airport]['IATA'].values[0]})
 
+
+# define layout
 app.layout = html.Div([
     
     dcc.Dropdown(
