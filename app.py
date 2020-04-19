@@ -21,23 +21,23 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 airports = pd.read_csv('us_airports.csv', index_col=0)
 airport_options = []
 
-map_layout = dict(
-        title = 'Your Route',
-        colorbar = False,
-        geo = dict(
-            scope = 'north america',
-            projection_type = 'azimuthal equal area',
-            showland = True,
-            landcolor = "rgb(250, 250, 250)",
-            subunitcolor = "rgb(217, 217, 217)",
-            countrycolor = "rgb(217, 217, 217)",
-            countrywidth = 0.5,
-            subunitwidth = 0.5))
+map_layout = dict(showlegend = False, 
+                  geo = dict(scope='north america',
+                             projection=dict(type='azimuthal equal area'),
+                             showland = True,
+                             showcountries = True,
+                             landcolor='rgb(60, 60, 60)',
+                             countrycolor='rgb(204, 204, 204)'),
+                  margin=dict(l=0,
+                              r=0,
+                              b=0,
+                              t=0,
+                              pad=0))
 
-map_marker = dict(size=8,
-                  color='rgb(255, 0, 0)',
-                  line=dict(width=3,
-                  color='rgba(68, 68, 68, 0)'))
+map_marker = dict(size=10,
+                  color="#e74c3c",
+                  line=dict(width=1,
+                            color='#000000'))
 
 # define dropdown options
 for airport in airports['NAME'].unique():
@@ -69,12 +69,21 @@ app.layout = html.Div([
                 'lat': [None, None],
                 'lon': [None, None],
                 'type': 'scattergeo'
+            }, 
+                {
+                'lat': [None, None],
+                'lon': [None, None],
+                'type': 'scattergeo'
             }],
-            'layout': map_layout
-        })
-    
+            'layout': map_layout,
+            },
+        
+        config={
+        'displayModeBar': False,
+        'scrollZoom': False})
     ])
 
+# text display origin airport
 @app.callback(
     dash.dependencies.Output('origin-text-output', 'children'),
     [dash.dependencies.Input('origin-dropdown', 'value')])
@@ -97,6 +106,7 @@ def update_destination(value):
      dash.dependencies.Input('destination-dropdown', 'value')]
 )
 
+# update map based on the dropdown airports
 def update_map(origin, destination):
     
     origin_airport = airports[(airports['IATA'] == origin)]   
@@ -104,12 +114,26 @@ def update_map(origin, destination):
     
     df_map = pd.concat([origin_airport, destination_airport])
     
+    text = ['Origin', 'Destination']
+    hover_text = ['<b>{}:<br>{}'.format(text[i], df_map['NAME'].values[i]) for i in range(len(df_map['NAME'].values))]
+    
     return {
         'data': [{
             'lat': df_map['LATITUDE'],
             'lon': df_map['LONGITUDE'],
             'marker': map_marker,
-            'type': 'scattergeo'
+            'type': 'scattergeo',
+            'hoverinfo': 'text',
+            'text': hover_text
+        },
+            {
+            'lat': df_map['LATITUDE'],
+            'lon': df_map['LONGITUDE'],
+            'mode': 'lines',
+            'type': 'scattergeo',
+            'line': dict(width=2,
+                         color="#e74c3c"),
+            'hoverinfo': 'skip'
         }],
         
         'layout': map_layout
