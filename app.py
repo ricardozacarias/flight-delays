@@ -23,10 +23,10 @@ airport_options = []
 
 map_layout = dict(
         title = 'Your Route',
-        colorbar = True,
+        colorbar = False,
         geo = dict(
-            scope='north america',
-            projection=dict(type='albers usa'),
+            scope = 'north america',
+            projection_type = 'azimuthal equal area',
             showland = True,
             landcolor = "rgb(250, 250, 250)",
             subunitcolor = "rgb(217, 217, 217)",
@@ -64,8 +64,8 @@ app.layout = html.Div([
         
         figure={
             'data': [{
-                'lat': None,
-                'lon': None,
+                'lat': [None, None],
+                'lon': [None, None],
                 'type': 'scattergeo'
             }],
             'layout': map_layout
@@ -97,17 +97,19 @@ def update_destination(value):
 
 def update_map(origin, destination):
     
-    # Airport filter
-    origin_airport = airports[(airports['IATA'] == origin)]
+    origin_airport = airports[(airports['IATA'] == origin)]   
     destination_airport = airports[(airports['IATA'] == destination)]
+    
+    df_map = pd.concat([origin_airport, destination_airport])
     
     return {
         'data': [{
-            'lat': [origin_airport['LATITUDE'].values[0], destination_airport['LATITUDE'].values[0]],
-            'lon': [destination_airport['LONGITUDE'].values[0], destination_airport['LONGITUDE'].values[0]],
+            'lat': df_map['LATITUDE'],
+            'lon': df_map['LONGITUDE'],
             'marker': map_marker,
             'type': 'scattergeo'
         }],
+        
         'layout': map_layout
     }
 
