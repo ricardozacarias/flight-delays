@@ -55,21 +55,20 @@ app.layout = html.Div(
             id="banner",
             className="banner",
             children=[
-                html.H3("US Flights"),
                 html.Img(
                     src="https://fanart.tv/fanart/movies/813/hdmovieclearart/airplane-5124096339ae1.png",
                     id="airplane-image",
                     style={
-                        "height": "120px",
+                        "height": "200px",
                         "width": "auto",
+                        "margin-top": "25px",
                         "margin-bottom": "25px",
-                            },
-                        )
-            ],
-        ),
-        
+                        "display":"block",
+                        "margin-left": "auto",
+                        "margin-right": "auto",})]),
+      
         html.Div(
-            id="dropdown-titles",
+            id="origin-dropdown-title",
             children=[
                 html.H6(html.Strong("Select origin")),
             ],
@@ -83,14 +82,26 @@ app.layout = html.Div(
             options=airport_options,
             placeholder='Select origin airport'),
         
-        html.Div(id='origin-text-output'),
+        html.Div(
+            id="destination-dropdown-title",
+            children=[
+                html.H6(html.Strong("Select destination")),
+            ],
+            style={
+                'textAlign': 'left',
+                'color': 'rgb(60, 60, 60)',
+        }),
         
         dcc.Dropdown(
             id='destination-dropdown',
             options=airport_options,
             placeholder='Select destination airport'),
         
-        html.Div(id='destination-text-output'),
+        html.Div(id='route-text-output',
+                 style={
+                'margin-top':'25px',
+                'textAlign': 'center',
+                'color': 'rgb(60, 60, 60)'}),
         
         dcc.Graph(
             id='map',
@@ -115,23 +126,18 @@ app.layout = html.Div(
         ])
             ])
 
-# text display origin airport
+# CALLBACKS
+# Text display route.
 @app.callback(
-    dash.dependencies.Output('origin-text-output', 'children'),
-    [dash.dependencies.Input('origin-dropdown', 'value')])
+    dash.dependencies.Output('route-text-output', 'children'),
+    [dash.dependencies.Input('origin-dropdown', 'value'),
+     dash.dependencies.Input('destination-dropdown', 'value')])
 
-def update_origin(value):
-    if value:
-        return 'Departing from {} ({})'.format(airports[airports['IATA'] == value]['NAME'].values[0], value)
+def update_route(origin, destination):
+    if origin and destination:
+        return dcc.Markdown(['#### Your Route', 'Departing from **{} ({})**'.format(airports[airports['IATA'] == origin]['NAME'].values[0], origin) + ', arriving at **{} ({})**'.format(airports[airports['IATA'] == destination]['NAME'].values[0], destination)])
 
-@app.callback(
-    dash.dependencies.Output('destination-text-output', 'children'),
-    [dash.dependencies.Input('destination-dropdown', 'value')])
-
-def update_destination(value):
-    if value:
-        return 'Arriving at {} ({})'.format(airports[airports['IATA'] == value]['NAME'].values[0], value)
-
+# Update map with route selected
 @app.callback(
     dash.dependencies.Output('map', 'figure'),
     [dash.dependencies.Input('origin-dropdown', 'value'),
