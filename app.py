@@ -123,7 +123,8 @@ app.layout = html.Div(
             config={
             'displayModeBar': False,
             'scrollZoom': False})
-        ])
+        ],
+        style={'width': '100%'})
             ])
 
 # CALLBACKS
