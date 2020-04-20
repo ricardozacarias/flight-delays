@@ -18,7 +18,10 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
+# open data
 airports = pd.read_csv('us_airports.csv', index_col=0)
+flights = pd.read_csv('C:/Users/Zaca/Documents/Datasets/flights/2019.csv', index_col=0)
+
 airport_options = []
 
 map_layout = dict(showlegend = False, 
@@ -34,6 +37,8 @@ map_layout = dict(showlegend = False,
                               t=0,
                               pad=0))
 
+pie_layout = dict(showlegend=True)
+
 map_marker = dict(size=10,
                   color="#e74c3c",
                   line=dict(width=1,
@@ -47,10 +52,7 @@ for airport in airports['NAME'].unique():
 # define layout
 app.layout = html.Div(
     className="container scalable",
-    children=[
-    
-    html.Div([
-        
+    children=[     
         html.Div(
             id="banner",
             className="banner",
@@ -65,8 +67,7 @@ app.layout = html.Div(
                         "margin-bottom": "25px",
                         "display":"block",
                         "margin-left": "auto",
-                        "margin-right": "auto",})]),
-      
+                        "margin-right": "auto",})]),      
         html.Div(
             id="origin-dropdown-title",
             children=[
@@ -122,9 +123,17 @@ app.layout = html.Div(
             
             config={
             'displayModeBar': False,
-            'scrollZoom': False})
-        ],
-        style={'width': '100%'})
+            'scrollZoom': False}),
+  
+        
+        html.Div([
+            html.H6('Hello'),
+            html.Div(id='airline-pie',
+                 className='six columns'),
+            html.Div(id='some-other-chart',
+                 className='six columns')
+            ],
+            className='pretty container')
             ])
 
 # CALLBACKS
@@ -177,6 +186,29 @@ def update_map(origin, destination):
         
         'layout': map_layout
     }
+
+@app.callback(
+    dash.dependencies.Output('airline-pie', 'children'),
+    [dash.dependencies.Input('origin-dropdown', 'value'),
+     dash.dependencies.Input('destination-dropdown', 'value')]
+)
+
+def update_airline_pie(origin, destination):
+       
+    data = flights[(flights['Origin'] == origin) & (flights['Dest'] == destination)]['Reporting_Airline'].value_counts(normalize=True)
+    
+    return dcc.Graph(
+            id='airline-pie-chart',
+            figure={
+                'data': [{
+                    'type': 'pie',
+                    'values': data.values,
+                    'labels': data.index}],                    
+                'layout': pie_layout,
+                    }, 
+            config={
+            'displayModeBar': False,
+            'scrollZoom': False})
 
 
 if __name__ == '__main__':
