@@ -159,15 +159,24 @@ def update_route(origin, destination):
 # update map based on the dropdown airports
 def update_map(origin, destination):
     
+    
+    
     origin_airport = airports[(airports['IATA'] == origin)]   
     destination_airport = airports[(airports['IATA'] == destination)]
     
     df_map = pd.concat([origin_airport, destination_airport])
     
     text = ['Origin', 'Destination']
-    cities = [flights[flights['Origin'] == origin]['OriginCityName'].unique(), flights[flights['Dest'] == destination]['DestCityName'].unique()]
     
-    hover_text = ['<b>{route}</b><br>{airport_name}<br>City: {city_name}'.format(route=text[i], airport_name= df_map['NAME'].values[i], city_name=cities[i][0]) for i in range(len(df_map['NAME'].values))]
+    cities = []
+    
+    if origin:
+        cities += [flights[flights['Origin'] == origin]['OriginCityName'].unique()[0]]
+        
+    if destination:
+        cities += [flights[flights['Dest'] == destination]['DestCityName'].unique()[0]]
+    
+    hover_text = ['<b>{route}</b><br>{airport_name}<br>City: {city_name}'.format(route=text[i], airport_name= df_map['NAME'].values[i], city_name=cities[i]) for i in range(len(df_map['NAME'].values))]
     
     return {
         'data': [{
