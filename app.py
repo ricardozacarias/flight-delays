@@ -165,7 +165,9 @@ def update_map(origin, destination):
     df_map = pd.concat([origin_airport, destination_airport])
     
     text = ['Origin', 'Destination']
-    hover_text = ['<b>{}:<br>{}'.format(text[i], df_map['NAME'].values[i]) for i in range(len(df_map['NAME'].values))]
+    cities = [flights[flights['Origin'] == origin]['OriginCityName'].unique(), flights[flights['Dest'] == destination]['DestCityName'].unique()]
+    
+    hover_text = ['<b>{route}</b><br>{airport_name}<br>City: {city_name}'.format(route=text[i], airport_name= df_map['NAME'].values[i], city_name=cities[i][0]) for i in range(len(df_map['NAME'].values))]
     
     return {
         'data': [{
@@ -199,7 +201,11 @@ def update_airline_pie(origin, destination):
        
     data = flights[(flights['Origin'] == origin) & (flights['Dest'] == destination)]['Reporting_Airline'].value_counts(normalize=True)
     
+    # fix colors
+    pie_marker = dict(line = dict(color='#000000', 
+                                  width=1))
     
+    #hover_text = 
     
     return dcc.Graph(
             id='airline-pie-chart',
@@ -208,9 +214,10 @@ def update_airline_pie(origin, destination):
                     'type': 'pie',
                     'values': data.values,
                     'labels': data.index,
-                    'color': data.values,
-                    'color_continuous_scale':px.colors.sequential.Viridis,
-                    'hole':0.3}], 
+                    'marker': pie_marker,
+                    'hole': 0.5,
+                    'hoverinfo':'text',
+                    'text':'hello'}], 
                 'layout': pie_layout,
                     }, 
             config={
