@@ -28,11 +28,7 @@ map_layout = dict(showlegend = False,
                              showland = True,
                              showcountries = True,
                              landcolor ='rgb(60, 60, 60)',
-                             oceancolor='#F2F2F2',
-                             countrycolor ='rgba(204, 204, 204)',
-                             paper_bgcolor='#F2F2F2',
-                             plot_bgcolor='#F2F2F2'),
-                  
+                             countrycolor ='rgb(204, 204, 204)'),
                   margin=dict(l=0,
                               r=0,
                               b=0,
@@ -69,57 +65,74 @@ app.layout = html.Div(
                         "margin-bottom": "25px",
                         "display":"block",
                         "margin-left": "auto",
-                        "margin-right": "auto",})]),      
-        html.Div(
-            id="origin-dropdown-title",
-            children=[
-                html.H6(html.Strong("Select origin")),
-            ],
-            style={
-                'textAlign': 'left',
-                'color': 'rgb(60, 60, 60)',
-        }),
-    
-        dcc.Dropdown(
-            id='origin-dropdown',
-            options=airport_options,
-            placeholder='Select origin airport'),
+                        "margin-right": "auto",})]), 
         
-        html.Div(
-            id="destination-dropdown-title",
-            children=[
-                html.H6(html.Strong("Select destination")),
-            ],
-            style={
-                'textAlign': 'left',
-                'color': 'rgb(60, 60, 60)',
-        }),
+        html.Div([
+            html.Div([
+                html.Div(
+                    id="origin-dropdown-title",
+                    children=[
+                        html.H6(html.Strong("Select origin")),
+                    ],
+                    style={
+                        'textAlign': 'left',
+                        'color': 'rgb(60, 60, 60)',
+                }),
         
-        dcc.Dropdown(
-            id='destination-dropdown',
-            options=airport_options,
-            placeholder='Select destination airport'),
-        
-        dcc.Graph(
-            id='map',
+                dcc.Dropdown(
+                    id='origin-dropdown',
+                    options=airport_options,
+                    placeholder='Select origin airport')],
+                     
+                className='pretty_container six columns'),
             
-            figure={
-                'data': [{
-                    'lat': [None, None],
-                    'lon': [None, None],
-                    'type': 'scattergeo'
-                }, 
-                    {
-                    'lat': [None, None],
-                    'lon': [None, None],
-                    'type': 'scattergeo'
-                }],
-                'layout': map_layout,
-                },
+            html.Div([
+                html.Div(
+                    id="destination-dropdown-title",
+                    children=[
+                        html.H6(html.Strong("Select destination")),
+                    ],
+                    style={
+                        'textAlign': 'left',
+                        'color': 'rgb(60, 60, 60)',
+                }),
+                
+                dcc.Dropdown(
+                    id='destination-dropdown',
+                    options=airport_options,
+                    placeholder='Select destination airport')],
+                
+                className='pretty_container six columns')],
             
-            config={
-            'displayModeBar': False,
-            'scrollZoom': False}),
+            className='row'),
+        
+        
+        # MAP CONTAINER
+        
+        html.Div(
+            dcc.Graph(
+                id='map',
+                
+                figure={
+                    'data': [{
+                        'lat': [None, None],
+                        'lon': [None, None],
+                        'type': 'scattergeo'
+                    }, 
+                        {
+                        'lat': [None, None],
+                        'lon': [None, None],
+                        'type': 'scattergeo'
+                    }],
+                    'layout': map_layout,
+                    },
+                
+                config={
+                'displayModeBar': False,
+                'scrollZoom': False}),
+            
+            className='pretty_container',
+        ),
         
         html.Div(id='route-text-output',
                  style={
@@ -129,9 +142,9 @@ app.layout = html.Div(
         
         html.Div([
             html.Div(id='route-info',
-                 className='six columns'),
+                 className='pretty_container six columns'),
             html.Div(id='airline-pie',
-                 className='six columns'),
+                 className='pretty_container six columns'),
             ],
             className='row')
             ])
@@ -239,7 +252,7 @@ def update_airline_pie(origin, destination):
 def update_route_info(origin, destination):
     data = flights[(flights['Origin'] == origin) & (flights['Dest'] == destination)]
     
-    return html.Div(className='pretty_container',
+    return html.Div(
                     children=[
                         html.H6('Number of flights: ' + str(data.shape[0]))],      
                     style={'textAlign':'left'})
