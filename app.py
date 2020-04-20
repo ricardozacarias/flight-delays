@@ -14,9 +14,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app = dash.Dash(__name__)
 
 # open data
 airports = pd.read_csv('airports_subset.csv', index_col=0)
@@ -30,7 +28,11 @@ map_layout = dict(showlegend = False,
                              showland = True,
                              showcountries = True,
                              landcolor ='rgb(60, 60, 60)',
-                             countrycolor ='rgb(204, 204, 204)'),
+                             oceancolor='#F2F2F2',
+                             countrycolor ='rgba(204, 204, 204)',
+                             paper_bgcolor='#F2F2F2',
+                             plot_bgcolor='#F2F2F2'),
+                  
                   margin=dict(l=0,
                               r=0,
                               b=0,
@@ -98,12 +100,6 @@ app.layout = html.Div(
             options=airport_options,
             placeholder='Select destination airport'),
         
-        html.Div(id='route-text-output',
-                 style={
-                'margin-top':'25px',
-                'textAlign': 'center',
-                'color': 'rgb(60, 60, 60)'}),
-        
         dcc.Graph(
             id='map',
             
@@ -124,18 +120,20 @@ app.layout = html.Div(
             config={
             'displayModeBar': False,
             'scrollZoom': False}),
-  
+        
+        html.Div(id='route-text-output',
+                 style={
+                'margin-top':'25px',
+                'textAlign': 'center',
+                'color': 'rgb(60, 60, 60)'}),
         
         html.Div([
-            html.H6('Placeholder Title'),
+            html.Div(id='route-info',
+                 className='six columns'),
             html.Div(id='airline-pie',
                  className='six columns'),
-            html.Div(id='some-other-chart',
-                 className='six columns')
             ],
-            className='row',
-            style={'textAlign':'center',
-                   'margin-top':'25px'})
+            className='row')
             ])
 
 # CALLBACKS
@@ -176,7 +174,7 @@ def update_map(origin, destination):
     if destination:
         cities += [flights[flights['Dest'] == destination]['DestCityName'].unique()[0]]
     
-    hover_text = ['<b>{route}</b><br>{airport_name}<br>City: {city_name}'.format(route=text[i], airport_name= df_map['NAME'].values[i], city_name=cities[i]) for i in range(len(df_map['NAME'].values))]
+    hover_text = ['<b>{route}</b><br>{airport_name}<br><b>City:</b> {city_name}'.format(route=text[i], airport_name= df_map['NAME'].values[i], city_name=cities[i]) for i in range(len(df_map['NAME'].values))]
     
     return {
         'data': [{
@@ -203,8 +201,7 @@ def update_map(origin, destination):
 @app.callback(
     dash.dependencies.Output('airline-pie', 'children'),
     [dash.dependencies.Input('origin-dropdown', 'value'),
-     dash.dependencies.Input('destination-dropdown', 'value')]
-)
+     dash.dependencies.Input('destination-dropdown', 'value')])
 
 def update_airline_pie(origin, destination):
        
@@ -233,6 +230,20 @@ def update_airline_pie(origin, destination):
             'displayModeBar': False,
             'scrollZoom': False})
 
+
+@app.callback(
+    dash.dependencies.Output('route-info', 'children'),
+    [dash.dependencies.Input('origin-dropdown', 'value'),
+     dash.dependencies.Input('destination-dropdown', 'value')])
+    
+def update_route_info(origin, destination):
+    data = flights[(flights['Origin'] == origin) & (flights['Dest'] == destination)]
+    
+    return html.Div(className='pretty_container',
+                    children=[
+                        html.H6('Number of flights: ' + str(data.shape[0]))],      
+                    style={'textAlign':'left'})
+    
 
 if __name__ == '__main__':
     app.run_server(debug=True)
