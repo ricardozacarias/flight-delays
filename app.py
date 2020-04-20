@@ -19,8 +19,8 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 # open data
-airports = pd.read_csv('us_airports.csv', index_col=0)
-flights = pd.read_csv('C:/Users/Zaca/Documents/Datasets/flights/2019.csv', index_col=0)
+airports = pd.read_csv('airports_subset.csv', index_col=0)
+flights = pd.read_csv('flights_subset.csv', index_col=0)
 
 airport_options = []
 
