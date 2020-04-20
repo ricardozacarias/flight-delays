@@ -127,13 +127,14 @@ app.layout = html.Div(
   
         
         html.Div([
-            html.H6('Hello'),
+            html.H6('Dashboard Report'),
             html.Div(id='airline-pie',
                  className='six columns'),
             html.Div(id='some-other-chart',
                  className='six columns')
             ],
-            className='pretty container')
+            className='row',
+            style={'textAlign':'center'})
             ])
 
 # CALLBACKS
