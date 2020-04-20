@@ -127,14 +127,15 @@ app.layout = html.Div(
   
         
         html.Div([
-            html.H6('Dashboard Report'),
+            html.H6('Placeholder Title'),
             html.Div(id='airline-pie',
                  className='six columns'),
             html.Div(id='some-other-chart',
                  className='six columns')
             ],
             className='row',
-            style={'textAlign':'center'})
+            style={'textAlign':'center',
+                   'margin-top':'25px'})
             ])
 
 # CALLBACKS
@@ -198,13 +199,18 @@ def update_airline_pie(origin, destination):
        
     data = flights[(flights['Origin'] == origin) & (flights['Dest'] == destination)]['Reporting_Airline'].value_counts(normalize=True)
     
+    
+    
     return dcc.Graph(
             id='airline-pie-chart',
             figure={
                 'data': [{
                     'type': 'pie',
                     'values': data.values,
-                    'labels': data.index}],                    
+                    'labels': data.index,
+                    'color': data.values,
+                    'color_continuous_scale':px.colors.sequential.Viridis,
+                    'hole':0.3}], 
                 'layout': pie_layout,
                     }, 
             config={
