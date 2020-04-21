@@ -234,9 +234,7 @@ def update_airline_pie(origin, destination):
                     'values': data.values,
                     'labels': data.index,
                     'marker': pie_marker,
-                    'hole': 0.5,
-                    'hoverinfo':'text',
-                    'text':'hello'}], 
+                    'hole': 0.5}], 
                 'layout': pie_layout,
                     }, 
             config={
@@ -252,10 +250,9 @@ def update_airline_pie(origin, destination):
 def update_route_info(origin, destination):
     data = flights[(flights['Origin'] == origin) & (flights['Dest'] == destination)]
     
-    return html.Div(
-                    children=[
-                        html.H6('Number of flights: ' + str(data.shape[0]))],      
-                    style={'textAlign':'left'})
+    return html.Div([html.H6('Number of flights: ' + str(data.shape[0])),
+                     html.H6('Number of flights: ' + str(data.shape[0]))],      
+                    style={'textAlign':'center'})
     
 
 if __name__ == '__main__':
